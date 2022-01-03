@@ -1,13 +1,15 @@
-import { Get, HttpResponseOK } from '@foal/core';
+import {
+  Context, Delete, Get, HttpResponseCreated, HttpResponseNoContent,
+  HttpResponseNotFound, HttpResponseOK, Post
+} from '@foal/core';
+
+import { Todo } from '../entities';
 
 export class ApiController {
 
   @Get('/todos')
-  getTodos() {
-    const todos = [
-      { id: 1, text: 'My task 1' },
-      { id: 2, text: 'My task 2' }
-    ];
+  async getTodos() {
+    const todos = await Todo.find();
     return new HttpResponseOK(todos);
   }
 
