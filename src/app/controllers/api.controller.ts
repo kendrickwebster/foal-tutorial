@@ -1,6 +1,7 @@
 import {
   Context, Delete, Get, HttpResponseCreated, HttpResponseNoContent,
-  HttpResponseNotFound, HttpResponseOK, Post
+  HttpResponseNotFound, HttpResponseOK, Post,
+  ValidateBody, ValidatePathParam
 } from '@foal/core';
 
 import { Todo } from '../entities';
@@ -14,6 +15,19 @@ export class ApiController {
   }
 
   @Post('/todos')
+  @ValidateBody({
+    // Every additional properties that are not defined in the "properties"
+    // object should be removed.
+    additionalProperties: false,
+    properties: {
+      // The "text" property of ctx.request.body should be a string if it exists.
+      text: { type: 'string' }
+    },
+    // The property "text" is required.
+    required: [ 'text' ],
+    // The body request should be an object once parsed by the framework.
+    type: 'object',
+  })
   async postTodo(ctx: Context) {
     // Create a new todo with the body of the HTTP request.
     const todo = new Todo();
@@ -27,6 +41,8 @@ export class ApiController {
   }
 
   @Delete('/todos/:id')
+  // The id should be a number. If it is not, the hook returns a "400 - Bad Request" error.
+  @ValidatePathParam('id', { type: 'number' })
   async deleteTodo(ctx: Context) {
     // Get the todo with the id given in the URL if it exists.
     const todo = await Todo.findOne({ id: ctx.request.params.id });
